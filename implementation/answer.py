@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
@@ -28,7 +29,24 @@ Context:
 
 vectorstore = Chroma(persist_directory=DB_NAME, embedding_function=embeddings)
 retriever = vectorstore.as_retriever()
-llm = ChatOpenAI(temperature=0, model_name=MODEL)
+
+# Configure OpenRouter from .env file
+openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+openrouter_base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+max_tokens = int(os.getenv("MAX_TOKENS", "2000"))  # Convert to int
+
+if openrouter_api_key:
+    # Use OpenRouter if API key is configured in .env
+    llm = ChatOpenAI(
+        model=MODEL,
+        temperature=0,
+        base_url=openrouter_base_url,
+        api_key=openrouter_api_key,
+        max_tokens=max_tokens,  # Limit tokens to stay within credit limits
+    )
+else:
+    # Fallback to direct OpenAI if OpenRouter not configured
+    llm = ChatOpenAI(temperature=0, model_name=MODEL)
 
 
 def fetch_context(question: str) -> list[Document]:
