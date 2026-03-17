@@ -1,50 +1,34 @@
 # The RAG Challenge
 
-Based on the InsureLLM project from Week 5. The knowledge-base contains extended data from the fictional company InsureLLM.
+## Introduction
 
-## Quick Start
+This is based off the InsureLLM project from Week 5 of the course.
 
-```bash
-# Ingest data
-cd implementation && uv run ingest.py
+The data in knowledge-base is an extended version of the knowledge base from week 5 of the fictional company, InsureLLM.
 
-# Run Q&A Chatbot (from project root)
-uv run app.py
+## How this is organized
 
-# Run evaluation (from project root)
-uv run evaluator.py
-```
+In the root directory:
 
-## Project Structure
+[lab.ipynb](lab.ipynb) is a walk-through notebook  
+`cd implementation` and then `uv run ingest.py` to ingest data  
+From project root, `uv run app.py` to run the Q&A Chatbot  
+From project root, `uv run evaluator.py` to run the evaluation  
 
-- `implementation/answer.py` - Question answering module with logging (logs to `logs/rag.log`)
-- `implementation/ingest.py` - Data ingestion module
-- `evaluation/` - Private evaluation code (do not modify)
+In the implementation directory:
 
-## Features
+[answer.py](implementation/answer.py) is the module that answers a user's question. You can change or rewrite `fetch_context()` and `answer_question()`
 
-- Multi-stage retrieval with reranking
-- RAG-Fusion with query variations
-- Self-correction and domain knowledge injection
-- Optional cross-encoder reranking (`uv add cross-encoder`)
+[ingest.py](implementation/ingest.py) is the module that loads in the data. You can change any of this!
 
-## Configuration
+In the evaluation directory:
 
-Create a `.env` file with:
+Private code that runs the evaluation on test data. Don't change this!
 
-```bash
-OPENROUTER_API_KEY=your_api_key_here
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-MODEL=gpt-4.1-nano
-MAX_TOKENS=2000
-INITIAL_RETRIEVAL_K=12
-FINAL_RETRIEVAL_K=12
-USE_RERANKING=true
-NUM_QUERY_VARIATIONS=4
-CHUNKS_PER_QUERY=8
-USE_RAG_FUSION=true
-USE_CONTEXT_SUMMARIZATION=false
-USE_SELF_CORRECTION=true
-USE_DOMAIN_KNOWLEDGE=true
-DOMAIN_KNOWLEDGE_K=3
-```
+## Your mission
+
+1. Work through the lab to understand the current state and ingest data  
+2. Reimplement `ingest.py` and `answer.py` with your ideas  
+3. Beat Ed and beat the other teams!  
+
+Good luck!
