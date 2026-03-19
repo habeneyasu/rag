@@ -14,7 +14,7 @@ class TestQuestion(BaseModel):
     category: str = Field(description="Question category (e.g., direct_fact, spanning, temporal)")
 
 
-def load_tests() -> list[TestQuestion]:
+def load_tests(use_comprehensive: bool = False) -> list[TestQuestion]:
     """Load test questions from JSONL file."""
     tests = []
     with open(TEST_FILE, "r", encoding="utf-8") as f:

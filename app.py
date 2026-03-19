@@ -1,5 +1,6 @@
 import gradio as gr
 from dotenv import load_dotenv
+from openai import InternalServerError, RateLimitError, APIConnectionError, APIError
 
 from implementation.answer import answer_question
 
@@ -14,18 +15,39 @@ def format_context(context):
     return result
 
 
-def chat(history):
-    last_message = history[-1]["content"]
-    prior = history[:-1]
-    answer, context = answer_question(last_message, prior)
-    history.append({"role": "assistant", "content": answer})
-    return history, format_context(context)
+def respond(message, history):
+    """Handle user message and generate response."""
+    if not message or not message.strip():
+        return history, "*Please enter a question*"
+    
+    if history is None:
+        history = []
+    history = history + [{"role": "user", "content": message}]
+    
+    try:
+        prior = history[:-1] if len(history) > 1 else []
+        answer, context = answer_question(message, prior)
+        history.append({"role": "assistant", "content": answer})
+        return history, format_context(context)
+    except (InternalServerError, RateLimitError, APIConnectionError, APIError) as e:
+        error_message = (
+            "⚠️ **Service Temporarily Unavailable**\n\n"
+            "The AI service is currently experiencing issues. Please try again in a few moments.\n\n"
+            f"*Error: {type(e).__name__}*"
+        )
+        history.append({"role": "assistant", "content": error_message})
+        return history, "*Unable to retrieve context due to service error*"
+    except Exception as e:
+        error_message = (
+            "❌ **An error occurred**\n\n"
+            "Something unexpected happened. Please try rephrasing your question.\n\n"
+            f"*Error: {str(e)[:200]}*"
+        )
+        history.append({"role": "assistant", "content": error_message})
+        return history, "*Unable to retrieve context due to error*"
 
 
 def main():
-    def put_message_in_chatbot(message, history):
-        return "", history + [{"role": "user", "content": message}]
-
     theme = gr.themes.Soft(font=["Inter", "system-ui", "sans-serif"])
 
     with gr.Blocks(title="Insurellm Expert Assistant", theme=theme) as ui:
@@ -34,7 +56,11 @@ def main():
         with gr.Row():
             with gr.Column(scale=1):
                 chatbot = gr.Chatbot(
-                    label="💬 Conversation", height=600, type="messages", show_copy_button=True
+                    label="💬 Conversation", 
+                    height=600, 
+                    type="messages", 
+                    show_copy_button=True,
+                    value=[]
                 )
                 message = gr.Textbox(
                     label="Your Question",
@@ -51,8 +77,13 @@ def main():
                 )
 
         message.submit(
-            put_message_in_chatbot, inputs=[message, chatbot], outputs=[message, chatbot]
-        ).then(chat, inputs=chatbot, outputs=[chatbot, context_markdown])
+            fn=respond,
+            inputs=[message, chatbot],
+            outputs=[chatbot, context_markdown]
+        ).then(
+            lambda: "",
+            outputs=[message]
+        )
 
     ui.launch(inbrowser=True)
 
