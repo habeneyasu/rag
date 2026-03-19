@@ -17,11 +17,6 @@ MODEL = "gpt-4.1-nano"
 DB_NAME = str(Path(__file__).parent.parent / "vector_db")
 KNOWLEDGE_BASE = str(Path(__file__).parent.parent / "knowledge-base")
 
-# Use BAAI/bge-base-en-v1.5: Best for RAG retrieval tasks
-# - Optimized for asymmetric retrieval (query vs document)
-# - Strong performance on retrieval benchmarks
-# - Better semantic search for RAG applications
-# - Runs locally, no API costs
 load_dotenv(override=True)
 embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-base-en-v1.5")
 
@@ -44,10 +39,8 @@ def fetch_documents():
 
 def create_chunks(documents):
     """Chunk documents with dynamic sizes and markdown header preservation."""
-
     all_chunks = []
     
-    # Markdown header splitter to preserve section structure
     headers_to_split_on = [
         ("#", "Header 1"),
         ("##", "Header 2"),
@@ -107,7 +100,7 @@ def create_chunks(documents):
             fallback_chunks = text_splitter.split_documents([doc])
             all_chunks.extend(fallback_chunks)
     
-    logger.info(f"Created {len(all_chunks)} chunks with advanced chunking strategy")
+    logger.info(f"Created {len(all_chunks)} chunks")
     return all_chunks
 
 

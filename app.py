@@ -20,13 +20,11 @@ def respond(message, history):
     if not message or not message.strip():
         return history, "*Please enter a question*"
     
-    # Add user message to history
     if history is None:
         history = []
     history = history + [{"role": "user", "content": message}]
     
     try:
-        # Get prior conversation (all messages except the last one we just added)
         prior = history[:-1] if len(history) > 1 else []
         answer, context = answer_question(message, prior)
         history.append({"role": "assistant", "content": answer})
@@ -34,21 +32,15 @@ def respond(message, history):
     except (InternalServerError, RateLimitError, APIConnectionError, APIError) as e:
         error_message = (
             "⚠️ **Service Temporarily Unavailable**\n\n"
-            "The AI service is currently experiencing issues. This is usually temporary.\n\n"
-            "**What you can do:**\n"
-            "- Please try again in a few moments\n"
-            "- The system will automatically retry on the next attempt\n\n"
-            f"*Error details: {type(e).__name__}*"
+            "The AI service is currently experiencing issues. Please try again in a few moments.\n\n"
+            f"*Error: {type(e).__name__}*"
         )
         history.append({"role": "assistant", "content": error_message})
         return history, "*Unable to retrieve context due to service error*"
     except Exception as e:
         error_message = (
             "❌ **An error occurred**\n\n"
-            "Something unexpected happened while processing your question.\n\n"
-            "**What you can do:**\n"
-            "- Please try rephrasing your question\n"
-            "- If the problem persists, the service may be temporarily unavailable\n\n"
+            "Something unexpected happened. Please try rephrasing your question.\n\n"
             f"*Error: {str(e)[:200]}*"
         )
         history.append({"role": "assistant", "content": error_message})
@@ -84,13 +76,12 @@ def main():
                     height=600,
                 )
 
-        # Simplified event handler - single function handles everything
         message.submit(
             fn=respond,
             inputs=[message, chatbot],
             outputs=[chatbot, context_markdown]
         ).then(
-            lambda: "",  # Clear the message box after submission
+            lambda: "",
             outputs=[message]
         )
 
