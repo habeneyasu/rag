@@ -1,34 +1,70 @@
-# The RAG Challenge
+# RAG Challenge - Performance Optimizations
 
-## Introduction
+## Overview
 
-This is based off the InsureLLM project from Week 5 of the course.
+This project implements advanced RAG (Retrieval-Augmented Generation) optimizations for the InsureLLM knowledge base, achieving significant improvements in accuracy, completeness, and retrieval metrics.
 
-The data in knowledge-base is an extended version of the knowledge base from week 5 of the fictional company, InsureLLM.
+## Performance Improvements
 
-## How this is organized
+![Performance Metrics Table](docs/performance_metrics.png)
 
-In the root directory:
+The implemented optimizations achieved significant metric improvements:
 
-[lab.ipynb](lab.ipynb) is a walk-through notebook  
-`cd implementation` and then `uv run ingest.py` to ingest data  
-From project root, `uv run app.py` to run the Q&A Chatbot  
-From project root, `uv run evaluator.py` to run the evaluation  
+| Metric | Baseline | Improved | % Increase |
+|--------|----------|----------|------------|
+| **MRR** | 0.7228 | 0.8087 | **+11.88%** |
+| **nDCG** | 0.7392 | 0.8102 | **+9.60%** |
+| **Keyword Coverage** | 80.8% | 93.5% | **+15.72%** |
+| **Accuracy** | 4.09 | 4.53 | **+10.76%** |
+| **Completeness** | 3.63 | 3.97 | **+9.37%** |
 
-In the implementation directory:
+### Key Optimization Techniques
 
-[answer.py](implementation/answer.py) is the module that answers a user's question. You can change or rewrite `fetch_context()` and `answer_question()`
+- **Hybrid Search**: Combined semantic and keyword-based retrieval
+- **RAG-Fusion**: Multi-query expansion with Reciprocal Rank Fusion (RRF)
+- **Cross-Encoder Reranking**: Semantic reranking for improved precision
+- **Self-Correction Loop**: Automated answer verification and correction
+- **Hierarchical Chunking**: Markdown-based structured chunking with dynamic sizes
+- **Domain Knowledge Injection**: Specialized retrieval for insurance terminology
 
-[ingest.py](implementation/ingest.py) is the module that loads in the data. You can change any of this!
+See [METRICS_IMPROVEMENTS.md](METRICS_IMPROVEMENTS.md) for detailed documentation of all optimization methods.
 
-In the evaluation directory:
+## Quick Start
 
-Private code that runs the evaluation on test data. Don't change this!
+```bash
+# Ingest data
+cd implementation && uv run ingest.py
 
-## Your mission
+# Run Q&A Chatbot
+uv run app.py
 
-1. Work through the lab to understand the current state and ingest data  
-2. Reimplement `ingest.py` and `answer.py` with your ideas  
-3. Beat Ed and beat the other teams!  
+# Run evaluation
+uv run evaluator.py
+```
 
-Good luck!
+## Project Structure
+
+- `implementation/answer.py` - Core RAG pipeline with adaptive retrieval and self-correction
+- `implementation/ingest.py` - Document ingestion with hierarchical markdown chunking
+- `app.py` - Gradio-based chat interface
+- `evaluator.py` - Comprehensive evaluation dashboard
+- `evaluation/` - Evaluation framework (do not modify)
+
+## Configuration
+
+Create a `.env` file (see `.env.example` for all available options):
+
+```bash
+OPENROUTER_API_KEY=your_api_key_here
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+MODEL=gpt-4.1-nano
+USE_RERANKING=true
+USE_RAG_FUSION=true
+USE_SELF_CORRECTION=true
+USE_DOMAIN_KNOWLEDGE=true
+```
+
+Optional: Install cross-encoder for reranking:
+```bash
+uv add cross-encoder
+```
